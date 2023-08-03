@@ -1,0 +1,514 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('../images/background.jpg') no-repeat;
+    background-size: cover;
+    background-position: center;
+
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 100px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 99;
+}
+
+.logo {
+    font-size: 3em;
+    color: transparent;
+    user-select: none;
+    background: url('../images/noteslogo.jpg');
+    background-size: 2.5em;
+    background-position: center;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: row;
+}
+
+.navigation a {
+    position: relative;
+    font-size: 1.1em;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 40px;
+}
+
+.navigation a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 100%;
+    height: 3px;
+    background: #fff;
+    border-radius: 5px;
+    transform-origin: right;
+    transform: scaleX(0);
+    transition: transform .5s;
+
+
+
+
+}
+
+.navigation a:hover::after {
+    transform: scaleX(1);
+
+}
+
+
+
+.navigation .btnLogin-popup {
+    width: 130px;
+    height: 50px;
+    background: transparent;
+    border: 2px solid #fff;
+    outline: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1em;
+    color: #fff;
+    font-weight: 500;
+    margin-left: 40px;
+    transition: .5s;
+
+}
+
+.navigation .btnLogin-popup:hover {
+    background-color: #fff;
+    color: #162938;
+
+}
+
+.wrapper {
+    position: absolute;
+    width: 400px;
+    height: max-content;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, .5);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transform: scale(0);
+    transition: height .2s ease;
+}
+
+.wrapper * {
+    height: fit-content ;
+}
+
+.wrapper.active-popup {
+    transform: scale(1);
+    transition: transform .2s ease;
+}
+
+.wrapper.active {
+    height: 520px
+}
+
+
+.wrapper .form-box {
+    width: 100%;
+    padding: 40px;
+
+}
+
+.wrapper .form-box.login {
+    transition: transform .18s ease;
+    transform: translateX(0);
+}
+
+.wrapper.active .form-box.login {
+    transition: none;
+    transform: translateX(-400px);
+}
+
+.wrapper .form-box.register {
+    position: absolute;
+    transition: none;
+    transform: translateX(400px);
+}
+
+.wrapper.active .form-box.register {
+    transition: transform .18s ease;
+    transform: translateX(0px);
+}
+
+.wrapper .icon-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    right: 0;
+    width: 45px;
+    height: 45px;
+    background: #162928;
+    font-size: 2em;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom-left-radius: 20px;
+    cursor: pointer;
+    z-index: 1;
+
+}
+
+.form-box h2 {
+    font-size: 2em;
+    color: #162938;
+    text-align: center;
+
+}
+
+.input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+
+    border-bottom: 2px solid #162938;
+    margin: 30px 0;
+
+
+
+}
+
+.input-box label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: #162938;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.input-box input:focus~label,
+.input-box input:valid~label,
+.input-box input:not(:placeholder-shown)~label {
+    top: -5px;
+}
+
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #162938;
+    font-weight: 600;
+}
+
+.input-box .icon {
+    position: absolute;
+    right: 8px;
+    font-size: 1.2em;
+    color: #162938;
+    line-height: 57px;
+}
+
+
+.remember-forgot {
+    font-size: 0.9em;
+    color: #162938;
+    font-weight: 500;
+    margin: -15px 0 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* Center elements vertically */
+}
+
+.remember-forgot label input {
+    accent-color: #162938;
+    margin-right: 3px;
+}
+
+
+.remember-forgot a {
+    color: #162938;
+    text-decoration: none;
+
+}
+
+.remember-forgot a:hover {
+    text-decoration: underline;
+}
+
+.btn {
+    width: 100%;
+    height: 45px;
+    background: #162928;
+    border: none;
+    outline: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #fff;
+    font-weight: 500;
+
+}
+
+.login-register {
+    font-size: 0.9em;
+    color: #162938;
+    text-align: center;
+    font-weight: 500;
+    margin: 25px 0 10px;
+    /* Add margin to space out from the previous element */
+}
+
+.login-register p {
+    display: flex;
+    /* Create a row layout for the link and text */
+    justify-content: center;
+    /* Center the elements horizontally */
+}
+
+.login-register p a {
+    color: #162938;
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+    /* Add margin to space out the link from the text */
+}
+
+.login-register p a:hover {
+    text-decoration: underline
+}
+
+
+
+
+/* The popup form - hidden by default */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    margin: 20px;
+}
+
+#notes-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+
+}
+
+.note {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    padding: 15px;
+    text-align: center;
+   
+}
+
+.note h2 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.note p {
+    margin: 0;
+}
+
+/* Custom style for the "All Notes" heading */
+.all-notes-heading {
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+    margin: 10px 20px 0;
+}
+
+/* Custom style for the "All Notes" heading */
+.all-notes-heading {
+    font-size: 24px;
+    color: #333;
+    text-align: left;
+
+
+    margin-top: 20px;
+    margin-left: 20px;
+
+
+}
+
+/* Custom style for each note box */
+.single-note-item {
+
+    margin-bottom: 20px;
+    padding: 15px;
+    margin: 0.5em;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.note-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.modal {
+    background: transparent;
+    border: 2.5px solid rgba(255, 255, 255, .5);
+    backdrop-filter: blur(10px);
+
+    font-weight: bold;
+    font-size: large;
+    display: none;
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.note-content {
+    padding: 1em 1em;
+}
+
+.left-align-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    margin: 0;
+    width: 60%;
+    left: 40%;
+}
+
+.container_search {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.form-box {
+    width: 300px;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    outline: none;
+}
+
+.btn-n-add {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.btn-n-add:hover,
+.btn-n-add:focus {
+    background-color: #0062cc;
+    border-color: #005cbf;
+}
+
+
+/* Position the chatbot icon at the bottom right corner */
+.chatbot-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+    z-index: 9999;
+    /* Make sure it's above other elements */
+}
+
+/* Optionally add styles for the chatbot icon image */
+.chatbot-icon img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.card {
+    width: 20rem;
+}
+
+#text {
+    width: 100%;
+    text-overflow: clip;
+}
+
