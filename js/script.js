@@ -10,7 +10,7 @@ registerLink.addEventListener('click', () => {
 });
 
 loginLink.addEventListener('click', () => {
-    wrapper.classList.add('active');
+    wrapper.classList.remove('active');
 });
 
 

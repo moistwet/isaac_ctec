@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website With Login & Registration | Codehal</title>
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/style2.css">
     <script>
         function showChatModal() {
             console.log("as");
@@ -43,13 +44,7 @@
     <header>
         <h2 class="logo">LOGO</h2>
         <nav class="navigation">
-            <div class="search-container">
-                <input id="search-input" class="search-input" type="text" placeholder="Test papers, videos, notes" />
-                <button id="search-button" class="search-button" onclick="performSearch()">
-                    <i class="fa fa-search"></i>
-                </button>
-            </div>
-            <div id="results-container"></div>
+            
 
             <a href="#">Home</a>
             <a href="#">About</a>
@@ -94,36 +89,36 @@
 
         <div class="form-box register">
             <h2>Registration</h2>
-            <form action="#">
+            <form action="#" id="registrationForm">
                 <div class="input-box">
                     <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" required>
+                    <input type="text" id="regUsername" required>
                     <label>Username</label>
                 </div>
                 <div class="input-box">
                     <span class="icon"><ion-icon name="mail"></ion-icon></span>
-                    <input type="email" required>
+                    <input type="email" id="regEmail" required>
                     <label>Email</label>
                 </div>
-
-
                 <div class="input-box">
                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" required>
+                    <span class="eye-icon" onclick="viewPwReg()"><ion-icon name="eye-outline"></ion-icon></span>
+                    <input type="password" id="regPassword" required>
                     <label>Password</label>
                 </div>
-
-                <div class="remember-forgot">
-                    <label><input type="checkbox"> Agree to the terms and conditions</label>
-
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="image"></ion-icon></span>
+                    <input type="file" id="imageInput" accept="image/*" required>
                 </div>
                 <button type="submit" class="btn">Register</button>
-
                 <div class="login-register">
                     <p>Already have an account? <a href="#" class="login-link">Login</a></p>
                 </div>
             </form>
         </div>
+    </div>
+    </form>
+    </div>
     </div>
     <div class="container_search">
         <form class="form-inline my-2 my-lg-0">
@@ -161,38 +156,70 @@
                 <input type="file" id="image-file" accept="image/*" required><br>
                 <p id="image-output"></p> <!-- Output text when the image is completed -->
 
+
+
                 <!-- Translate button -->
                 <button type="button" id="translate-button">Translate</button>
                 <p id="translated-text-output"></p> <!-- Output text when the button is pressed -->
 
+
                 <button type="submit">Add</button>
             </form>
+            <table id="result-table" style="border-collapse: collapse; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid black; padding: 8px;">Labels</th>
+                        <th style="border: 1px solid black; padding: 8px;">Detected Text</th>
+                    </tr>
+                </thead>
+                <tbody id="result-table-body"></tbody>
+            </table>
+
+            <img id="image-output" style="max-width: 300px; max-height: 300px; margin-top: 20px;">
         </div>
     </div>
 
 
-    <div class="chatbot-icon" id="chat-icon">
-        <img src="./images/chatbot.jpg" alt="Chatbot Icon">
-    </div>
 
-    <div id="chat-modal" class="modal">
 
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Chat with the Chatbot</h2>
 
-            <div id="chat-container">
-                <div id="chat-log"></div>
-                <div id="user-input">
-                    <input type="text" id="user-message" placeholder="Type your message...">
-                    <button id="send-button">Send</button>
-                </div>
-            </div>
+
+    <div class="modal-search" id="searchingmodal">
+        <span class="close" onclick="toggleSearchBar()">&times;</span>
+        <h2>Search Bar</h2>
+        <div class="search-container">
+            <input id="search-input" class="search-input" type="text" placeholder="Test papers, videos, notes" />
+            <button id="search-button" class="search-button" onclick="performSearch()">
+                <i class="fa fa-search"></i>
+            </button>
         </div>
+        
+        <p>Search result:</p>
+        <!-- Results Container -->
+        <div id="results-container"></div>
     </div>
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
 
     <div w3-include-html="./updatenote.html"></div>
 </body>
+
+
 
 
 <script src="https://www.w3schools.com/lib/w3.js"></script>
@@ -210,6 +237,7 @@
 <script src="./js/scriptdis.js"></script>
 <script src="./js/login.js"></script>
 <script src="./js/script.js"></script>
+<script src="./js/translate.js"></script>
 <script src="https://ydr1otrz.search.kendra.us-east-1.on.aws/home"></script>
 
 

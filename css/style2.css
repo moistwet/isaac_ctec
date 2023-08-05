@@ -1,0 +1,179 @@
+/* Style for the close button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Style for the close button on hover */
+.close:hover {
+    color: black;
+}
+
+/* Style for the form elements */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+input[type="file"] {
+    margin-bottom: 16px;
+}
+
+/* Style for the translate button */
+#translate-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Style for the add button */
+button[type="submit"] {
+    background-color: #008CBA;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+/* Style for the add button on hover */
+button[type="submit"]:hover {
+    background-color: #005580;
+}
+
+/* Style for the table */
+#result-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#result-table th,
+#result-table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+/* Style for the modal content's images */
+#image-output {
+    max-width: 300px;
+    max-height: 300px;
+    margin-top: 20px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Custom background for the modal content */
+.modal-content {
+    background: linear-gradient(135deg, #F2C94C, #F2994A);
+    /* Add your custom background image or gradient here */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.modal-content {
+    background-image: url("../images/noteback.jpg");
+
+    /* Additional background properties as needed */
+}
+
+
+/* Logo Styling */
+#logo-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9999;
+}
+
+#logo {
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+/* Search Bar Modal Styling */
+
+
+.search-container {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.search-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* Hide the search bar modal by default */
+.hidden {
+    display: none;
+}
+
+/* Position the modal container at the bottom right corner */
+/* Position the modal container at the bottom left corner */
+.modal-search {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 9998;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Rest of your existing CSS styles */
+/* ... */
+
+
+/* Rest of your existing CSS styles */
+/* ... */

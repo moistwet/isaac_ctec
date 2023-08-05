@@ -132,11 +132,9 @@ header {
     height: 520px
 }
 
-
 .wrapper .form-box {
     width: 100%;
     padding: 40px;
-
 }
 
 .wrapper .form-box.login {
@@ -157,7 +155,7 @@ header {
 
 .wrapper.active .form-box.register {
     transition: transform .18s ease;
-    transform: translateX(0px);
+    transform: translateX(0);
 }
 
 .wrapper .icon-close {

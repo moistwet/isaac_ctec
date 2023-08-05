@@ -1,66 +1,53 @@
-import boto3
 import json
-import logging
+import boto3
 
-# Configure logging
-logger = logging.getLogger()
-logger.setLevel(logging.ERROR)
+s3_client = boto3.client(service_name='s3')
+translate = boto3.client('translate')
 
-def search_kendra(query):
-    kendra_index_id = '7883faeb-b3d2-4871-ae47-3d85b0f0d2f2'
-    kendra = boto3.client('kendra', region_name='us-east-1')
-
-    try:
-        # Call Kendra to perform the search
-        response = kendra.query(IndexId=kendra_index_id, QueryText=query)
-        search_results = response['ResultItems']
-        return search_results
-    except Exception as e:
-        # Log the error
-        logger.error(f"Error searching Kendra: {str(e)}")
-        raise Exception(f"Error searching Kendra: {str(e)}")
+def translate_text(text, lang_code):
+    result = translate.translate_text(
+        Text=text,
+        SourceLanguageCode='auto',
+        TargetLanguageCode=lang_code
+    )
+    return result['TranslatedText']
 
 def lambda_handler(event, context):
-    # Parse the search query from the frontend
-    print("Function being used")
-    search_query = event['queryStringParameters']['q'] if 'queryStringParameters' in event else None
-    print(search_query)
+    try:
+        # Parse the input JSON from the request body
+        request_body = json.loads(event['body'])
+        input_text = request_body.get('text')
+        target_lang = request_body.get('lang_code', 'bn')
 
-    if search_query:
-        try:
-            # Call the search function and get the search results
-            search_results = search_kendra(search_query)
+        if not input_text:
+            raise ValueError('Missing "text" field in the request body.')
 
-            # Return the search results as the API response with necessary headers
-            response = {
-                "statusCode": 200,
-                "headers": {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                "body": json.dumps(search_results)
-            }
-            return response
-        except Exception as e:
-            # Log the error
-            logger.error(f"An error occurred: {str(e)}")
+        # Translate the input text
+        translated_text = translate_text(input_text, target_lang)
+        print(translated_text)
 
-            response = {
-                "statusCode": 500,
-                "headers": {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*"
-                },
-                "body": json.dumps({"error": f"An error occurred: {str(e)}"})
-            }
-            return response
-    else:
+        # Create the API response with only the translated text as the body
         response = {
-            "statusCode": 400,
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            },
-            "body": json.dumps({"error": "Search query is missing."})
+            'statusCode': 200,
+            'body': json.dumps(translated_text),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*' ,
+                'Access-Control-Allow-Credentials': True, # To allow CORS
+            }
         }
+
         return response
+
+    except Exception as e:
+        # In case of any error, return an error response
+        error_response = {
+            'statusCode': 400,
+            'body': json.dumps({'error': str(e)}),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*' , # To allow CORS
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+        return error_response
