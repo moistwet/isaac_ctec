@@ -177,3 +177,7 @@ button[type="submit"]:hover {
 
 /* Rest of your existing CSS styles */
 /* ... */
+
+.row {
+    max-height: 800px;
+}

@@ -30,6 +30,7 @@ async function fetchAllNotes() {
 
 function renderNotesList(notes) {
     const notesListDiv = document.getElementById('note-full-container');
+    //const notesListDiv = document.querySelector('.scroll-container');
     notesListDiv.innerHTML = ''; // Clear the previous content
 
     if (!notes || notes.length === 0) {
@@ -487,3 +488,57 @@ function translateText(inputText, targetLang) {
         });
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    if (sessionStorage.getItem("userData") !== null) {
+        document.getElementById("everythingnote").style.display = "block";
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const registrationForm = document.getElementById("registrationForm");
+    registrationForm.addEventListener("submit", handleRegistration);
+});
+
+function registerUser() {
+    const apiUrl = "https://l8ctzu3mnb.execute-api.us-east-1.amazonaws.com/test/face";
+    const username = document.getElementById("regUsername").value;
+    const password = document.getElementById("regPassword").value;
+    const imageInput = document.getElementById("imageInput");
+
+    const imageFile = imageInput.files[0];
+    const fileReader = new FileReader();
+
+    fileReader.onload = function (e) {
+        const imageFileBase64 = e.target.result.split(",")[1];
+
+        const requestBody = {
+            httpMethod: "POST", // Include the httpMethod field
+            body: JSON.stringify({
+                username: username,
+                password: password,
+                face: imageFileBase64,
+            }),
+        };
+
+        fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                // Process the API response here if needed
+                console.log("Registration response:", data);
+                // You can redirect to a success page or show a success message here
+            })
+            .catch((error) => {
+                // Handle any errors that occurred during the API call
+                console.error("Error during registration:", error);
+                // You can display an error message here or handle the error as you prefer
+            });
+    };
+
+    fileReader.readAsDataURL(imageFile); // Read and load the selected image as base64
+}
