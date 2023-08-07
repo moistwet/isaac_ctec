@@ -29,9 +29,25 @@ async function fetchAllNotes() {
 }
 
 function renderNotesList(notes) {
+    profile = sessionStorage.getItem('userData');
+    profile = JSON.parse(profile);
+    console.log(profile);
+    profile_id = profile.profile;
+    console.log(profile_id)
+    console.log("render", notes)
     const notesListDiv = document.getElementById('note-full-container');
     //const notesListDiv = document.querySelector('.scroll-container');
     notesListDiv.innerHTML = ''; // Clear the previous content
+    var notes = notes.filter(function (note) {
+        return note.profile_fk_to_text == profile_id;
+    });
+    console.log(notes)
+    const searchInput = document.getElementById('searchbig');
+
+    
+
+
+
 
     if (!notes || notes.length === 0) {
         // Handle error or no data scenario
@@ -90,7 +106,7 @@ function renderNotesList(notes) {
     
                 <!-- Edit and Delete Buttons -->
                 <div class="ml-auto edit-delete-buttons">
-                    <span class="edit-button" onclick="openUpdateNoteModal('${note.id}','${note.title}','${note_text}')" data-noteId="${note.id}">
+                    <span class="edit-button" onclick="openUpdateNoteModal('${note.id}','${note.title}','${note_text}','${note_image}')" data-noteId="${note.id}">
                         <i class="fa fa-edit"></i> Edit
                     </span>
                     <span class="delete-button" onclick="deleteNote(${note.id})" data-noteId="${note.id}">
@@ -110,12 +126,120 @@ function renderNotesList(notes) {
 
 
 
+function renderNotesListsearch(notes) {
+    profile = sessionStorage.getItem('userData');
+    profile = JSON.parse(profile);
+    console.log(profile);
+    profile_id = profile.profile;
+    console.log(profile_id)
+    console.log("render", notes)
+    const notesListDiv = document.getElementById('note-full-container');
+    //const notesListDiv = document.querySelector('.scroll-container');
+    notesListDiv.innerHTML = ''; // Clear the previous content
+    var notes = notes.filter(function (note) {
+        return note.profile_fk_to_text == profile_id;
+    });
+    console.log(notes)
+    const searchInput = document.getElementById('searchbig');
+    //get value
+    const searchQuery = searchInput.value;
+    //filter from text
+    var notes = notes.filter(function (note) {
+        return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || note.text.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    
+
+
+
+
+    if (!notes || notes.length === 0) {
+        // Handle error or no data scenario
+        notesListDiv.innerHTML = '<p>No notes found.</p>';
+        return;
+    }
+
+    for (let note of notes) {
+        // console.log(note)
+        let text, note_text, note_image;
+        try {
+            text = Array.isArray(eval(note.text)) ? eval(note.text) : note.text;
+        } catch (error) {
+            text = note.text;
+        }
+        if (typeof text === 'string') {
+            note_text = text;
+            note_image = '';
+        }
+        else {
+            note_image = text[0];
+            note_text = text[1];
+        }
+
+        // var notes_text = note.text
+        // const note_texting = note.text.replace(/"/g, '').split(',');
+        // const note_image = note_texting[0].slice(1);
+
+        // const note_text = note_texting.length > 1 ? note_texting[1].slice(0, -1) : '';
+
+        // Truncate the note text if needed
+        // const maxLength = 30;
+        // const truncatedNoteText = note_text.length > maxLength ? note_text.substring(0, maxLength) + '...' : note_text;
+
+        const noteHTML = `
+        <div class="col-md-4 single-note-item all-category notepad-note">
+        <div class="card card-body notepad-card">
+            <!-- Side Stick -->
+            <span class="side-stick"></span>
+    
+            <!-- Note Title -->
+            <h5 class="note-title text-truncate w-75 mb-0 notepad-title" data-noteHeading="${note.title}">
+                ${note.title}<i class="point fa fa-circle ml-1 font-10"></i>
+            </h5>
+    
+            <!-- Note Content -->
+            <div class="note-content">
+                <img src="${note_image}" alt="Note Image" class="notepad-image"  width="300">
+                <p class="note-inner-content text-muted" data-noteContent="${note_text}">
+                    ${note_text}
+                </p>
+            </div>
+    
+          
+            
+    
+                <!-- Edit and Delete Buttons -->
+                <div class="ml-auto edit-delete-buttons">
+                    <span class="edit-button" onclick="openUpdateNoteModal('${note.id}','${note.title}','${note_text}','${note_image}')" data-noteId="${note.id}">
+                        <i class="fa fa-edit"></i> Edit
+                    </span>
+                    <span class="delete-button" onclick="deleteNote(${note.id})" data-noteId="${note.id}">
+                        <i class="fa fa-trash"></i> Delete
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+        `;
+
+        notesListDiv.insertAdjacentHTML('beforeend', noteHTML);
+    }
+}
+
 
 // Entry point function
 async function initialize() {
     const notes = await fetchAllNotes();
     renderNotesList(notes);
 }
+
+async function initializesearch() {
+    const notes = await fetchAllNotes();
+    renderNotesListsearch(notes);
+}
+
 
 // Call the initialize function when the page loads
 window.onload = initialize;
@@ -124,6 +248,7 @@ window.onload = initialize;
 document.addEventListener('DOMContentLoaded', function () {
     const addNoteModal = document.getElementById('add-note-modal');
     addNoteModal.style.display = 'none';
+    initialize();
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -159,6 +284,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const noteText = document.getElementById('note-text').value;
         const storedFileImageName = localStorage.getItem('file_name');
         console.log('Stored file image name:', storedFileImageName);
+        profile = sessionStorage.getItem('userData');
+        profile = JSON.parse(profile);
+        console.log(profile);
+        profile_id = profile.profile;
+        console.log(profile_id)
+
 
         const imageFileBase64 = localStorage.getItem('file_base64');
         try {
@@ -170,7 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const requestBody = {
                 title: noteTitle,
                 text: noteTotal,
-                profile_fk_to_text: 1 // Replace with the actual profile ID
+                profile_fk_to_text: profile_id // Replace with the actual profile ID
             };
 
             // Send a POST request to your API endpoint
@@ -197,6 +328,9 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Error adding note:', error.message);
             // Show an error message to the user, etc.
+            initialize();
+            //set add-notemodal to hidden
+            modal.style.display = 'none';
         }
     });
 
@@ -286,6 +420,7 @@ document.getElementById('image-file').addEventListener('change', function () {
                     console.log("Image Labels:", imageParticulars.labels);
                     console.log("Detected Text:", imageParticulars.text);
                     displayrecResult(imageParticulars);
+                    sessionStorage.setItem('imageParticulars', JSON.stringify(imageParticulars));
 
 
                     // Optionally, you can use the labels and text as needed
@@ -367,7 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Function to open the update note modal and populate the form fields with existing note data
-function openUpdateNoteModal(noteId, noteTitle, noteText) {
+function openUpdateNoteModal(noteId, noteTitle, noteText, note_image) {
     const updateNoteModal = document.getElementById('updateNoteModal');
     updateNoteModal.style.display = 'block';
 
@@ -382,7 +517,7 @@ function openUpdateNoteModal(noteId, noteTitle, noteText) {
     // Add event listener to the "Update Note" button
     submitUpdateButton.addEventListener('click', function (event) {
         event.preventDefault(); // Prevent form submission
-        updateNote(noteId);
+        updateNote(noteId, note_image);
     });
 }
 
@@ -390,19 +525,20 @@ function openUpdateNoteModal(noteId, noteTitle, noteText) {
 // Rest of your code remains unchanged
 
 // Function to handle the form submission when the "Update" button is clicked
-async function updateNote(noteId) {
+async function updateNote(noteId, note_image) {
 
     const updateNoteIdInput = noteId;
     const updateNoteTitleInput = document.getElementById('updateNoteTitle').value;
     const updateNoteTextInput = document.getElementById('updateNoteText').value;
     console.log(updateNoteIdInput, updateNoteTitleInput, updateNoteTextInput);
+    var noting = JSON.stringify([note_image, updateNoteTextInput]);
 
     const apiUrl = 'https://ntsp8gbdf2.execute-api.us-east-1.amazonaws.com/this/notelibrary';
 
     const requestBody = {
         notelibrary_pk: updateNoteIdInput,
         title: updateNoteTitleInput,
-        text: updateNoteTextInput
+        text: noting
     };
     console.log(requestBody); // Check the requestBody object in the console
 
@@ -491,6 +627,7 @@ function translateText(inputText, targetLang) {
 document.addEventListener("DOMContentLoaded", function () {
     if (sessionStorage.getItem("userData") !== null) {
         document.getElementById("everythingnote").style.display = "block";
+        initialize();
     }
 });
 
@@ -542,3 +679,29 @@ function registerUser() {
 
     fileReader.readAsDataURL(imageFile); // Read and load the selected image as base64
 }
+
+
+const logoutButton = document.getElementById('logout');
+
+function logout() {
+    // Clear the user data from session storage
+    sessionStorage.clear();
+    //hide logout button based on id
+    document.getElementById('Logout').style.display = 'none';
+    document.getElementById('everythingnote').style.display = 'none';
+}
+
+async function copyToClipboard(event) {
+    if (event) {
+      event.preventDefault();
+    }
+    const textbox = sessionStorage.getItem('imageParticulars');
+    const text = JSON.parse(textbox).text;
+    const latest = document.getElementById('note-text');
+    if (latest.value == '') {
+      document.getElementById('note-text').value = text;
+      //set value in id
+    } else {
+      document.getElementById('note-text').value = latest.value + text;
+    }
+  }

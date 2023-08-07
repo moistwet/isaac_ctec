@@ -31,6 +31,10 @@ async function login(event) {
 
         // Store the response data in the session storage
         sessionStorage.setItem('userData', JSON.stringify(responseData));
+        // close the login modal
+        document.getElementById('login-modal').style.display = 'none';
+        // display note container
+        document.getElementById('everythingnote').style.display = 'block';
 
         // Return the response as-is
         return response;
@@ -41,3 +45,12 @@ async function login(event) {
         return { statusCode: 500, body: 'An error occurred during login.' };
     }
 }
+window.addEventListener('DOMContentLoaded', () => {
+    const userData = sessionStorage.getItem('userData');
+    if (userData) {
+      // Display logout button
+      document.getElementById('Logout').style.display = 'block';
+      
+      
+    }
+  });

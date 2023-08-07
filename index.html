@@ -25,7 +25,12 @@
             }
         }
     </script>
+    <!-- Add the bcryptjs library using a CDN -->
+
+
 </head>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
 
 <body onload="initialize()">
     <script type="text/javascript">
@@ -46,16 +51,15 @@
         <nav class="navigation">
 
 
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Contact</a>
+            <a style="display: none;" id="Logout" onclick="logout()">Logout</a>
+
 
             <button class="btnLogin-popup">Login</button>
             <button class="btnLogin-popup" id="btn-add-note">Add Note</button>
 
         </nav>
     </header>
-    <div class="wrapper">
+    <div class="wrapper" id = "login-modal">
         <span class="icon-close">
             <ion-icon name="close"></ion-icon>
         </span>
@@ -86,6 +90,10 @@
                 </div>
             </form>
         </div>
+
+        
+
+
 
         <div class="form-box register">
             <h2>Registration</h2>
@@ -119,8 +127,8 @@
 
     <div class="container_search">
         <form class="form-inline my-2 my-lg-0">
-            <input class="form-box" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn-n-add" type="submit">Search</button>
+            <input class="form-box" type="search" placeholder="Search" aria-label="Search" id="searchbig">
+            <button class="btn-n-add" type="submit" onclick = "initializesearch()">Search</button>
         </form>
     </div>
 
@@ -169,6 +177,9 @@
                     <label for="image-file">Upload Image:</label>
                     <input type="file" id="image-file" accept="image/*" required><br>
                     <p id="image-output"></p> <!-- Output text when the image is completed -->
+
+                    <button onclick="copyToClipboard()">Copy to clipboard</button>
+
 
 
 
