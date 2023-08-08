@@ -39,12 +39,12 @@ function renderNotesList(notes) {
     //const notesListDiv = document.querySelector('.scroll-container');
     notesListDiv.innerHTML = ''; // Clear the previous content
     var notes = notes.filter(function (note) {
-        return note.profile_fk_to_text == profile_id;
+        return note.profile_fk_to_text == profile_id || note.profile_fk_to_text == 1;
     });
-    console.log(notes)
+    console.log(notes);
     const searchInput = document.getElementById('searchbig');
 
-    
+
 
 
 
@@ -148,7 +148,7 @@ function renderNotesListsearch(notes) {
         return note.title.toLowerCase().includes(searchQuery.toLowerCase()) || note.text.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
-    
+
 
 
 
@@ -693,15 +693,15 @@ function logout() {
 
 async function copyToClipboard(event) {
     if (event) {
-      event.preventDefault();
+        event.preventDefault();
     }
     const textbox = sessionStorage.getItem('imageParticulars');
     const text = JSON.parse(textbox).text;
     const latest = document.getElementById('note-text');
     if (latest.value == '') {
-      document.getElementById('note-text').value = text;
-      //set value in id
+        document.getElementById('note-text').value = text;
+        //set value in id
     } else {
-      document.getElementById('note-text').value = latest.value + text;
+        document.getElementById('note-text').value = latest.value + text;
     }
-  }
+}

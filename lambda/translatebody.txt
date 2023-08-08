@@ -1,0 +1,53 @@
+import json
+import boto3
+import json
+
+s3_client = boto3.client(service_name='s3')
+translate = boto3.client('translate')
+
+def translate_text(text, lang_code):
+    result = translate.translate_text(
+        Text=text,
+        SourceLanguageCode='auto',
+        TargetLanguageCode=lang_code
+    )
+    return result['TranslatedText']
+
+
+
+def lambda_handler(event, context):
+    #request_body = json.loads(event['body'])
+    #input_text = request_body.get('text')
+    #target_lang = request_body.get('lang_code', 'bn')
+    input_text = event['text']
+    target_lang = event['target_lang']
+
+    # Parse the input JSON from the request body
+    if not input_text:
+        error_response = {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Missing "text" field in the request body.'}),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+        return error_response
+
+    # Translate the input text
+    translated_text = translate_text(input_text, target_lang)
+    print(translated_text)
+
+    # Create the API response with only the translated text as the body
+    response = {
+        'statusCode': 200,
+        'body': json.dumps(translated_text),
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': True,
+        }
+    }
+
+    return response

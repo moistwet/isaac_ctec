@@ -1,0 +1,422 @@
+#basic crud functions
+import pymysql
+import json
+import hashlib
+# Configuration values
+endpoint = 'ctecdatabaseidone.capdzgn2aaws.us-east-1.rds.amazonaws.com'
+username = 'admin'
+password = 'isaacjl2111'
+database_name = 'noteweb'
+
+connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+
+def lambda_handler(event, context):
+    try:
+        http_method = event['httpMethod']
+        if not http_method:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'message': 'Invalid input data.'}),
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                    "Access-Control-Allow-Methods": "OPTIONS, POST, DELETE, GET",
+                    "Content-Type": "application/json"
+                }
+            }
+        query_parameters = event.get('queryStringParameters')
+        
+
+        if http_method == 'GET':
+            if query_parameters is None:
+                return get_all_notes(event, context)
+            elif 'notelibrary_pk' in query_parameters:
+                return get_single_note(event, context, query_parameters['notelibrary_pk'])
+            elif 'search_keyword' in query_parameters:
+                return get_single_note_by_name(event, context, query_parameters['search_keyword'])
+
+            
+            
+
+        elif http_method == 'POST':
+            if 'note' in query_parameters:
+                return add_note(event, context)
+            elif 'profile' in query_parameters:
+                return add_profile(event, context)
+            elif 'profilelogin' in query_parameters:
+                return login(event, context)
+
+        elif http_method == 'PUT':
+            return update_note(event, context)
+
+        elif http_method == 'DELETE':
+            return delete_note(event, context)
+
+        else:
+            return {
+                'statusCode': 400,
+                'body': 'Invalid HTTP method'
+            }
+
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while processing the request.'
+        }
+
+
+
+def add_profile(event, context):
+    try:
+        profile_data = json.loads(event['body'])
+        username = profile_data['username']
+        password = profile_data['password']
+
+        cursor = connection.cursor()
+
+        cursor.execute('INSERT INTO profilelibrary (username, password) VALUES (%s, %s)',
+                       (username, password))
+        connection.commit()
+
+        response = {
+            'statusCode': 200,
+            'body': 'Profile added successfully',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while adding the profile.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+
+def login(event, context):
+    try:
+        # Parse the request body to get the username and password
+        request_body = json.loads(event['body'])
+        username = request_body.get('username')
+        password = request_body.get('password')
+
+        if not username or not password:
+            return {
+                'statusCode': 400,
+                'body': 'Username and password must be provided in the request body.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+        # Create a cursor to execute the query
+        cursor = connection.cursor()
+
+        # Execute the SELECT query to retrieve the profile based on the provided username
+        cursor.execute('SELECT * FROM profiles WHERE username = %s', (username,))
+        row = cursor.fetchone()
+
+        if not row:
+            # If the profile with the given username is not found, return a 404 response
+            return {
+                'statusCode': 404,
+                'body': 'Profile not found.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+        # Get the hashed password from the database
+        stored_password = row[2]
+
+        # Hash the provided password using SHA-256 for comparison
+        hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+        # Check if the provided password matches the stored hashed password in the database
+        if hashed_password == stored_password:
+            # If the password matches, return the profile as a JSON response with a 200 status code
+            profile = {
+                'profile': row[0],
+                'username': row[1]
+            }
+
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(profile),
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+            return response
+        else:
+            # If the password does not match, return a 401 Unauthorized response
+            return {
+                'statusCode': 401,
+                'body': 'Invalid credentials.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while fetching the profile.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+            }
+        }
+
+
+def get_all_notes(event, context):
+    try:
+        cursor = connection.cursor()
+        cursor.execute('SELECT * FROM notelibrary')
+        rows = cursor.fetchall()
+        notes = []
+        for row in rows:
+            note = {
+                'id': row[0],
+                'title': row[1],
+                'text': row[2],
+                'profile_fk_to_text': row[3]
+            }
+            notes.append(note)
+        
+        response = {
+            'statusCode': 200,
+            'body': json.dumps(notes),  # Convert the list to a JSON string
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+        return response
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while fetching notes.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+
+
+def get_single_note(event, context,note_id):
+    try:
+        # Extract the 'note_id' from the pathParameters in the event
+        #note_id = event['pathParameters']['note_id']
+        
+        # Create a cursor to execute the query
+        cursor = connection.cursor()
+
+        # Execute the SELECT query to retrieve the single note based on 'note_id'
+        cursor.execute('SELECT * FROM notelibrary WHERE notelibrary_pk = %s', (note_id,))
+        row = cursor.fetchone()
+
+        if not row:
+            # If the note with the given ID is not found, return a 404 response
+            return {
+                'statusCode': 404,
+                'body': 'Note not found.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+            }
+
+        # Create a note dictionary to hold the note data
+        note = {
+            'id': row[0],
+            'title': row[1],
+            'text': row[2],
+            'profile_fk_to_text': row[3]
+        }
+
+        # Return the note as a JSON response with a 200 status code
+        response = {
+            'statusCode': 200,
+            'body': json.dumps(note),
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while fetching the note.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+
+def get_single_note_by_name(event, context,search_keyword):
+    try:
+        # Extract the search keyword from the pathParameters in the event
+        #search_keyword = event['pathParameters']['search_keyword']
+
+        # Create a cursor to execute the query
+        cursor = connection.cursor()
+
+        # Execute the SELECT query to retrieve notes based on the search keyword
+        # We use the 'LIKE' operator to find partial matches in the 'title' and 'text' columns
+        cursor.execute('SELECT * FROM notelibrary WHERE title LIKE %s OR text LIKE %s',
+                       ('%' + search_keyword + '%', '%' + search_keyword + '%'))
+        rows = cursor.fetchall()
+
+        if not rows:
+            # If no notes are found with the given keyword, return a 404 response
+            return {
+                'statusCode': 404,
+                'body': 'No notes found with the given keyword.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+            }
+
+        # Create a list to hold the notes found
+        notes = []
+        for row in rows:
+            note = {
+                'id': row[0],
+                'title': row[1],
+                'text': row[2],
+                'profile_fk_to_text': row[3]
+            }
+            notes.append(note)
+
+        # Return the list of notes as a JSON response with a 200 status code
+        response = {
+            'statusCode': 200,
+            'body': json.dumps(notes),
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while searching for notes.'
+        }
+
+
+
+def add_note(event, context):
+    try:
+        note_data = json.loads(event['body'])
+        title = note_data['title']
+        text = note_data['text']
+        profile_fk_to_text = note_data['profile_fk_to_text']
+
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO notelibrary (title, text, profile_fk_to_text) VALUES (%s, %s, %s)',
+                       (title, text, profile_fk_to_text))
+        connection.commit()
+        
+        response = {
+            'statusCode': 200,
+            'body': 'Note added successfully',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while adding a note.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+
+def update_note(event, context):
+    try:
+        note_data = json.loads(event['body'])
+        note_id = note_data['notelibrary_pk']
+        title = note_data['title']
+        text = note_data['text']
+
+        cursor = connection.cursor()
+        cursor.execute('UPDATE notelibrary SET title = %s, text = %s WHERE notelibrary_pk = %s',
+                       (title, text, note_id))
+        connection.commit()
+        
+        response = {
+            'statusCode': 200,
+            'body': 'Note updated successfully',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while updating a note.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+
+def delete_note(event, context):
+    try:
+        note_id = event['queryStringParameters']['notelibrary_pk']
+
+        cursor = connection.cursor()
+        cursor.execute('DELETE FROM notelibrary WHERE notelibrary_pk = %s', (note_id,))
+        connection.commit()
+        
+        response = {
+            'statusCode': 200,
+            'body': 'Note deleted successfully',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }
+        return response
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while deleting a note.',
+            'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,}
+        }

@@ -1,0 +1,189 @@
+#register function requires pymysql
+
+import json
+import base64
+import boto3
+import pymysql
+
+# Configuration values
+endpoint = 'ctecdatabaseidone.capdzgn2aaws.us-east-1.rds.amazonaws.com'
+username = 'admin'
+password = 'isaacjl2111'
+database_name = 'noteweb'
+collection_id = 'your_rekognition_collection_id'
+
+rekognition_client = boto3.client('rekognition')
+s3_bucket_name = 'imageface2201925a'
+
+connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+
+
+import hashlib
+
+def login(event, context):
+    try:
+        # Parse the request body to get the username and password
+        request_body = json.loads(event['body'])
+        username = request_body.get('username')
+        password = request_body.get('password')
+
+        if not username or not password:
+            return {
+                'statusCode': 400,
+                'body': 'Username and password must be provided in the request body.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+        # Create a cursor to execute the query
+        cursor = connection.cursor()
+
+        # Execute the SELECT query to retrieve the profile based on the provided username
+        cursor.execute('SELECT * FROM profiles WHERE username = %s', (username,))
+        row = cursor.fetchone()
+
+        if not row:
+            # If the profile with the given username is not found, return a 404 response
+            return {
+                'statusCode': 404,
+                'body': 'Profile not found.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+        # Get the hashed password from the database
+        stored_password = row[2]
+
+        # Hash the provided password using SHA-256 for comparison
+        hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+        # Check if the provided password matches the stored hashed password in the database
+        if hashed_password == stored_password:
+            # If the password matches, return the profile as a JSON response with a 200 status code
+            profile = {
+                'profile': row[0],
+                'username': row[1]
+            }
+
+            response = {
+                'statusCode': 200,
+                'body': json.dumps(profile),
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+            return response
+        else:
+            # If the password does not match, return a 401 Unauthorized response
+            return {
+                'statusCode': 401,
+                'body': 'Invalid credentials.',
+                'headers': {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': True,
+                }
+            }
+
+    except Exception as e:
+        # Log the error for debugging purposes (you can use CloudWatch Logs)
+        print(f"Error occurred: {str(e)}")
+        # Return an error response with appropriate status code and message
+        return {
+            'statusCode': 500,
+            'body': 'An error occurred while fetching the profile lol.',
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+
+def add_profile(event, context):
+    try:
+        profile_data = json.loads(event['body'])
+        username = profile_data['username']
+        password = profile_data['password']
+        face_base64 = profile_data['face']
+
+        # Decode the base64 encoded face image data
+        face_data = base64.b64decode(face_base64)
+
+        # Hash the password using SHA-256
+        hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+        # Upload the face image to S3 (Optional: You can skip this step if the image is already stored in S3)
+        s3_client = boto3.client('s3')
+        s3_object_key = f"profile_faces/{username}.jpg"  # Change the filename as per your requirement
+        s3_client.put_object(
+            Bucket=s3_bucket_name,
+            Key=s3_object_key,
+            Body=face_data,
+            ACL="public-read",
+            ContentType="image/jpeg"
+        )
+        # Get the S3 object URL
+        s3_object_url = f"https://{s3_bucket_name}.s3.amazonaws.com/{s3_object_key}"
+
+        cursor = connection.cursor()
+
+        # Insert the profile data into the profiles table with the hashed password
+        cursor.execute('INSERT INTO profiles (username, password, face) VALUES (%s, %s, %s)',
+                       (username, hashed_password, s3_object_url))
+        connection.commit()
+
+        response = {
+            'statusCode': 200,
+            'body': 'Profile added successfully',
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+        return response
+
+    except Exception as e:
+        # Handle any exceptions that occurred during registration
+        print("Error during registration:", str(e))
+        response = {
+            'statusCode': 500,
+            'body': 'Error during registration',
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': True,
+            }
+        }
+        return response
+def lambda_handler(event, context):
+    
+    http_method = event['httpMethod']
+    if http_method == 'POST':
+        request_body = json.loads(event['body'])
+        if 'face' in request_body:
+            return add_profile(event, context)
+        else:
+            return login(event, context)
+
+    return {
+        'statusCode': 400,
+        'body': 'Invalid HTTP method',
+        'headers': {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': True,
+        }
+    }
+
+
+
+# {
+#   "httpMethod": "POST",
+#   "body": "{\"username\": \"testuser\", \"password\": \"testpassword\"}"
+# }
+
+# {
+#   "httpMethod": "POST",
+#   "body": "{\"username\": \"newuser\", \"password\": \"newpassword\", \"face\": \"base64_encoded_image_data\"}"
+# }

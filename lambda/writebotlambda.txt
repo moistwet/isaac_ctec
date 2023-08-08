@@ -1,0 +1,146 @@
+#code for backend
+import pymysql 
+import json
+import logging
+# Configuration values
+endpoint = 'ctecdatabaseidone.capdzgn2aaws.us-east-1.rds.amazonaws.com'
+username = 'admin'
+password = 'isaacjl2111' 
+database_name = 'noteweb'
+
+connection = pymysql.connect(host=endpoint, user=username, password=password, db=database_name)
+
+
+def validate(slots):
+    if not slots['title']:
+        return {
+            'isValid': False,
+            'violatedSlot': 'title'
+        }
+    
+    if not slots['text']:
+        return {
+            'isValid': False,
+            'violatedSlot': 'text'
+        }
+    
+    return {'isValid': True}
+
+
+def validate(slots):
+    if not slots['title']:
+        return {
+            'isValid': False,
+            'violatedSlot': 'title'
+        }
+    
+    if not slots['text']:
+        return {
+            'isValid': False,
+            'violatedSlot': 'text'
+        }
+    
+    return {'isValid': True}
+def lambda_handler(event, context):
+    
+    # print(event)
+    slots = event['sessionState']['intent']['slots']
+    intent = event['sessionState']['intent']['name']
+    print(event['invocationSource'])
+    print(slots)
+    print(intent)
+    validation_result = validate(event['sessionState']['intent']['slots'])
+    
+    if event['invocationSource'] == 'DialogCodeHook':
+        if not validation_result['isValid']:
+            
+            if 'message' in validation_result:
+            
+                response = {
+                "sessionState": {
+                    "dialogAction": {
+                        'slotToElicit':validation_result['violatedSlot'],
+                        "type": "ElicitSlot"
+                    },
+                    "intent": {
+                        'name':intent,
+                        'slots': slots
+                        
+                        }
+                },
+                "messages": [
+                    {
+                        "contentType": "PlainText",
+                        "content": validation_result['message']
+                    }
+                ]
+               } 
+            else:
+                response = {
+                "sessionState": {
+                    "dialogAction": {
+                        'slotToElicit':validation_result['violatedSlot'],
+                        "type": "ElicitSlot"
+                    },
+                    "intent": {
+                        'name':intent,
+                        'slots': slots
+                        
+                        }
+                }
+               } 
+    
+            return response
+           
+        else:
+            response = {
+            "sessionState": {
+                "dialogAction": {
+                    "type": "Delegate"
+                },
+                "intent": {
+                    'name':intent,
+                    'slots': slots
+                    
+                    }
+        
+            }
+        }
+            return response
+    
+    if event['invocationSource'] == 'FulfillmentCodeHook':
+        title_interpreted = slots['title']['value']['interpretedValue']
+        text_interpreted = slots['text']['value']['interpretedValue']
+        
+        combined = str(["https://stockimage2201925a.s3.amazonaws.com/chatbot.jpg",text_interpreted])
+        
+        print(title_interpreted,text_interpreted)
+
+        # Add sql in Database
+        cursor = connection.cursor()
+        cursor.execute('INSERT INTO notelibrary (title, text, profile_fk_to_text) VALUES (%s, %s, %s)',
+                       (title_interpreted,combined,1))
+        connection.commit()
+        
+        response = {
+        "sessionState": {
+            "dialogAction": {
+                "type": "Close"
+            },
+            "intent": {
+                'name':intent,
+                'slots': slots,
+                'state':'Fulfilled'
+                
+                }
+    
+        },
+        "messages": [
+            {
+                "contentType": "PlainText",
+                "content": "Please reload your website"
+            }
+        ]
+    }
+            
+        return response

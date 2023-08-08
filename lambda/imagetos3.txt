@@ -1,0 +1,45 @@
+#uploads base64 encoded string into image
+
+import boto3
+import base64
+
+def upload_base64_to_s3(bucket_name, base64_string, file_name):
+    # Decode the Base64 string
+    file_data = base64.b64decode(base64_string)
+
+    # Initialize the S3 client
+    s3_client = boto3.client("s3")
+
+    try:
+        # Upload the file to S3 with public-read ACL and content type as image/jpeg
+        s3_client.put_object(
+            Bucket=bucket_name,
+            Key=file_name,
+            Body=file_data,
+            ACL="public-read",
+            ContentType="image/jpeg"
+        )
+
+        # Generate the URL of the uploaded file
+        file_url = f"https://{bucket_name}.s3.amazonaws.com/{file_name}"
+
+        return file_url
+    except Exception as e:
+        # Handle any errors that occurred during the upload
+        print(f"Error uploading file to S3: {str(e)}")
+        return None
+
+def lambda_handler(event, context):
+    # Parse the input from the Lambda event
+    bucket_name = "imagectec2201925a"  # Replace with your actual bucket name
+    base64_string = event["base64_string"]
+    file_name = event["file_name"]
+
+    # Call the function to upload the Base64 string to S3
+    file_url = upload_base64_to_s3(bucket_name, base64_string, file_name)
+
+    # Return the result
+    return {
+        "statusCode": 200,
+        "body": file_url
+    }

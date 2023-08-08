@@ -35,6 +35,7 @@ async function login(event) {
         document.getElementById('login-modal').style.display = 'none';
         // display note container
         document.getElementById('everythingnote').style.display = 'block';
+        initializesearch();
 
         // Return the response as-is
         return response;
@@ -48,9 +49,9 @@ async function login(event) {
 window.addEventListener('DOMContentLoaded', () => {
     const userData = sessionStorage.getItem('userData');
     if (userData) {
-      // Display logout button
-      document.getElementById('Logout').style.display = 'block';
-      
-      
+        // Display logout button
+        document.getElementById('Logout').style.display = 'block';
+
+
     }
-  });
+});
